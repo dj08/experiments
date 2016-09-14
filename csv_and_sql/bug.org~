@@ -1,0 +1,58 @@
+#+TITLE: Bug report
+#+PROPERTY: mkdirp yes
+
+* Setup
+Need to exec this first in order for sqlite src to be exec'ed.
+#+BEGIN_SRC emacs-lisp :results silent
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((emacs-lisp . t)
+   (sh         . t)
+   (sqlite     . t)
+   (C          . t)))
+#+END_SRC
+
+* CSV files
+For a sample, I have the following CSV file:
+
+#+BEGIN_SRC csv :tangle sample1.csv
+Year,Make,Model,Description,Price
+1997,Ford,E350,"ac, abs, moon",3000.00
+1999,Chevy,"Venture ""Extended Edition""","",4900.00
+1999,Chevy,"Venture ""Extended Edition, Very Large""",,5000.00
+1996,Jeep,Grand Cherokee,"MUST SELL!
+air, moon roof, loaded",4799.00
+#+END_SRC
+
+* Playing with SQL
+Now stat playing with SQL. 
+
+The following snippet works fine:
+#+BEGIN_SRC sqlite :db bug.db :exports results :results verbatim
+DROP TABLE IF EXISTS cars;
+CREATE TABLE cars (Year,Make,Model,Description,Price);
+.mode csv
+.separator ","
+.import sample1.csv cars
+SELECT * FROM cars;
+#+END_SRC
+
+#+RESULTS:
+: Year,Make,Model,Description,Price
+: 1997,Ford,E350,"ac, abs, moon",3000.00
+: 1999,Chevy,"Venture ""Extended Edition""","",4900.00
+: 1999,Chevy,"Venture ""Extended Edition, Very Large""","",5000.00
+: 1996,Jeep,"Grand Cherokee","MUST SELL!
+: air, moon roof, loaded",4799.00
+
+
+However, the following fails, just because =:results= is set to default.
+# BEGIN_SRC sqlite :db sample.db :exports results :results verbatim
+#+BEGIN_SRC sqlite :db sample.db :exports results
+DROP TABLE IF EXISTS cars;
+CREATE TABLE cars ( Year,Make,Model,Description,Price );
+select * from cars;
+.mode csv
+.import sample1.csv cars
+SELECT * FROM cars;
+#+END_SRC

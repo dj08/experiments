@@ -1,0 +1,51 @@
+#+TITLE: Converting CSV files to SQLite3 and Vice Versa
+#+PROPERTY: mkdirp yes
+
+* Introduction
+CSVs are a convinient data dumping format in cases where all data
+needs to be dumped at the same time. However, they only increase the
+pain when the data needs to be modified, or sorted by a particular
+column for presentation purposes. It is hence convinient to have a
+native ability to convert csv files to sql. In this demo, I would be
+using =sqlite3= and a comma seperated CSV taken from [[https://en.wikipedia.org/wiki/Comma-separated_values#Example][wikipedia]].
+
+* CSV files
+For a sample, I have the following CSV file:
+
+#+BEGIN_SRC csv :tangle sample1.csv
+Year,Make,Model,Description,Price
+1997,Ford,E350,"ac, abs, moon",3000.00
+1999,Chevy,"Venture ""Extended Edition""","",4900.00
+1999,Chevy,"Venture ""Extended Edition, Very Large""",,5000.00
+1996,Jeep,Grand Cherokee,"MUST SELL!
+air, moon roof, loaded",4799.00
+#+END_SRC
+
+* Playing with SQL
+I got some help from [[http://stackoverflow.com/questions/14947916/import-csv-to-sqlite][this]] SO question. Proceeding accordingly, for a
+first try, I managed to import csv without headers.
+
+As per [[https://www.sqlite.org/cli.html#csv][this]] guide, =.mode csv= is important to help the interpreter,
+though it is normally [[https://www.sqlite.org/cli.html][just an output mode syntax]].
+
+#+BEGIN_SRC sqlite :db sample.db :exports results :results verbatim
+DROP TABLE IF EXISTS cars;
+CREATE TABLE cars ( Year,Make,Model,Description,Price );
+select * from cars;
+.mode csv
+.import sample1.csv cars
+SELECT * FROM cars;
+#+END_SRC
+
+#+RESULTS:
+: Year,Make,Model,Description,Price
+: 1997,Ford,E350,"ac, abs, moon",3000.00
+: 1999,Chevy,"Venture ""Extended Edition""","",4900.00
+: 1999,Chevy,"Venture ""Extended Edition, Very Large""","",5000.00
+: 1996,Jeep,"Grand Cherokee","MUST SELL!
+: air, moon roof, loaded",4799.00
+
+
+However, importing without creating a table, that is, just using csv
+headers, does not seem to work all that well. I keep getting errors in
+that. Will explore sometime later - could be a version issue.
